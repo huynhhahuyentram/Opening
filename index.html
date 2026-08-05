@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
 <meta charset="UTF-8">
 <title>CREATE 3D OPENING</title>
@@ -12,34 +12,21 @@ body {
     padding: 20px;
 }
 
-/* ===== CONTAINER ===== */
 .container {
-    max-width: 900px;
+    max-width: 950px;
     margin: auto;
     background: white;
     padding: 20px;
     border-radius: 12px;
 }
 
-/* ===== IMAGE ===== */
-#banner {
+/* ===== CANVAS 3D ===== */
+#canvas3d {
     width: 100%;
-    max-height: 180px;
-    object-fit: contain;
-    border-radius: 10px;
-    margin-bottom: 20px;
-}
-
-/* ===== GROUP ===== */
-.group {
-    background: #f5f7fa;
-    padding: 15px;
+    height: 200px;
+    background: #f0f0f0;
     border-radius: 10px;
     margin-bottom: 15px;
-}
-
-.group h3 {
-    margin-bottom: 10px;
 }
 
 /* ===== GRID ===== */
@@ -49,24 +36,32 @@ body {
     gap: 15px;
 }
 
-.grid-3 {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-}
-
 .grid-4 {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 10px;
 }
 
+/* ===== GROUP ===== */
+.group {
+    background: #f7f9fc;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+label {
+    font-size: 13px;
+}
+
 /* ===== INPUT ===== */
 input {
     width: 100%;
-    padding: 8px;
+    height: 32px;
+    padding: 5px;
+    margin-bottom: 8px;
     border-radius: 6px;
     border: 1px solid #ccc;
+    box-sizing: border-box;
 }
 
 /* ===== BUTTON ===== */
@@ -79,15 +74,11 @@ input {
 button {
     flex: 1;
     padding: 10px;
-    border: none;
     border-radius: 8px;
-    cursor: pointer;
+    border: none;
     background: #007bff;
     color: white;
-}
-
-button:hover {
-    background: #0056b3;
+    cursor: pointer;
 }
 </style>
 </head>
@@ -96,141 +87,167 @@ button:hover {
 
 <div class="container">
 
-<!-- ===== IMAGE ===== -->
-<img id="banner"
-src="https://raw.githubusercontent.com/huynhhahuyentram/Opening/main/aveva.png"
-onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,
-<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;900&quot; height=&quot;200&quot;>
-<rect width=&quot;100%&quot; height=&quot;100%&quot; fill=&quot;#ddd&quot;/>
-<text x=&quot;50%&quot; y=&quot;50%&quot; dominant-baseline=&quot;middle&quot; text-anchor=&quot;middle&quot; font-size=&quot;22&quot; fill=&quot;#555&quot;>
-NO IMAGE
-</text>
-</svg>';">
-    
+<canvas id="canvas3d"></canvas>
+
 <h2>CREATE 3D OPENING</h2>
 
-<!-- ===== POSITION + DIMENSION ===== -->
 <div class="grid-2">
 
 <div class="group">
 <h3>Position</h3>
-
-<label>X [mm]</label>
-<input id="x" value="0">
-
-<label>Y [mm]</label>
-<input id="y" value="0">
-
-<label>Z [mm]</label>
-<input id="z" value="0">
+<label>X [mm]</label><input id="x" value="0">
+<label>Y [mm]</label><input id="y" value="0">
+<label>Z [mm]</label><input id="z" value="0">
 </div>
 
 <div class="group">
 <h3>Dimension</h3>
-
-<label>Length [mm]</label>
-<input id="length">
-
-<label>Width [mm]</label>
-<input id="width">
-
-<label>Height [mm]</label>
-<input id="height">
+<label>Length [mm]</label><input id="length" value="300">
+<label>Width [mm]</label><input id="width" value="200">
+<label>Height [mm]</label><input id="height" value="150">
 </div>
 
 </div>
 
-<!-- ===== CORNER ===== -->
 <div class="group">
 <h3>Corner Radius</h3>
-
 <div class="grid-4">
-<div>
-<label>R1</label>
-<input id="r1" value="150">
-</div>
-
-<div>
-<label>R2</label>
-<input id="r2" value="150">
-</div>
-
-<div>
-<label>R3</label>
-<input id="r3" value="150">
-</div>
-
-<div>
-<label>R4</label>
-<input id="r4" value="150">
-</div>
+<div><label>R1</label><input id="r1" value="150"></div>
+<div><label>R2</label><input id="r2" value="150"></div>
+<div><label>R3</label><input id="r3" value="150"></div>
+<div><label>R4</label><input id="r4" value="150"></div>
 </div>
 </div>
 
-<!-- ===== BUTTON ===== -->
 <div class="buttons">
 <button onclick="create()">Create</button>
 <button onclick="resetForm()">Reset</button>
 <button onclick="help()">Help</button>
-<button onclick="voice()">Voice</button>
+<button onclick="startVoice()">Voice</button>
 </div>
 
 </div>
 
 <script>
+/* ===== DRAW 3D BOX ===== */
+const canvas = document.getElementById("canvas3d");
+const ctx = canvas.getContext("2d");
+
+function drawBox() {
+    canvas.width = canvas.offsetWidth;
+    canvas.height = 200;
+
+    let L = +document.getElementById("length").value || 300;
+    let W = +document.getElementById("width").value || 200;
+    let H = +document.getElementById("height").value || 150;
+
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    let scale = 0.5;
+    let x = 150, y = 120;
+
+    let l = L * scale;
+    let w = W * scale;
+    let h = H * scale;
+
+    // front
+    ctx.strokeRect(x, y, l, h);
+
+    // top
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + w, y - w/2);
+    ctx.lineTo(x + l + w, y - w/2);
+    ctx.lineTo(x + l, y);
+    ctx.closePath();
+    ctx.stroke();
+
+    // side
+    ctx.beginPath();
+    ctx.moveTo(x + l, y);
+    ctx.lineTo(x + l + w, y - w/2);
+    ctx.lineTo(x + l + w, y + h - w/2);
+    ctx.lineTo(x + l, y + h);
+    ctx.closePath();
+    ctx.stroke();
+}
+
+/* auto redraw */
+document.querySelectorAll("input").forEach(i=>{
+    i.addEventListener("input", drawBox);
+});
+
+/* ===== RESET ===== */
 function resetForm() {
-    document.getElementById("x").value = 0;
-    document.getElementById("y").value = 0;
-    document.getElementById("z").value = 0;
-
-    document.getElementById("r1").value = 150;
-    document.getElementById("r2").value = 150;
-    document.getElementById("r3").value = 150;
-    document.getElementById("r4").value = 150;
-
-    document.getElementById("length").value = "";
-    document.getElementById("width").value = "";
-    document.getElementById("height").value = "";
+    x.value=0;y.value=0;z.value=0;
+    r1.value=r2.value=r3.value=r4.value=150;
+    length.value=300;width.value=200;height.value=150;
+    drawBox();
 }
 
+/* ===== HELP ===== */
 function help() {
-    window.open("https://drive.google.com", "_blank");
+    window.open("https://drive.google.com","_blank");
 }
 
+/* ===== CREATE ===== */
 function create() {
     alert("Created!");
 }
 
 /* ===== VOICE ===== */
-function voice() {
-    alert("Xin chào, tôi có thể giúp gì cho bạn");
+function speak(text){
+    let u = new SpeechSynthesisUtterance(text);
+    u.lang = "vi-VN";
+    speechSynthesis.speak(u);
+}
 
-    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    recognition.lang = "vi-VN";
-    recognition.interimResults = false;
+function startVoice() {
 
-    recognition.start();
+    speak("Xin chào, tôi có thể giúp gì cho bạn");
 
-    recognition.onresult = function(event) {
-        let text = event.results[0][0].transcript.toLowerCase();
+    const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    rec.lang = "vi-VN";
+    rec.continuous = false;
+    rec.interimResults = false;
 
-        let nums = text.match(/\d+/g);
-        if (!nums) return;
+    rec.start();
 
-        document.getElementById("x").value = nums[0] || 0;
-        document.getElementById("y").value = nums[1] || 0;
-        document.getElementById("z").value = nums[2] || 0;
+    let timeout;
 
-        alert("File của bạn đã được tạo xong");
+    rec.onresult = e => {
+        clearTimeout(timeout);
 
-        setTimeout(() => {
-            let link = document.createElement('a');
-            link.download = "opening.txt";
-            link.href = "data:text/plain,Created";
-            link.click();
-        }, 500);
+        let t = e.results[0][0].transcript.toLowerCase();
+        let nums = t.match(/\d+/g);
+
+        if(nums){
+            x.value = nums[0]||0;
+            y.value = nums[1]||0;
+            z.value = nums[2]||0;
+            length.value = nums[3]||300;
+            width.value = nums[4]||200;
+            height.value = nums[5]||150;
+        }
+
+        drawBox();
+
+        timeout = setTimeout(()=>{
+            speak("File của bạn đã được tạo xong");
+
+            setTimeout(()=>{
+                let a=document.createElement("a");
+                a.href="data:text/plain,created";
+                a.download="opening.txt";
+                a.click();
+            },800);
+
+        },2000); // delay đợi người dùng nói xong
     };
 }
+
+/* init */
+drawBox();
 </script>
 
 </body>
