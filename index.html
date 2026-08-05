@@ -2,68 +2,64 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>CREATE 3D OPENING</title>
+<title>Opening Tool</title>
 
 <link rel="stylesheet" href="style.css">
-</head>
 
+</head>
 <body>
 
-<div class="container">
+<div class="app">
 
-<!-- CANVAS -->
-<canvas id="canvas3d"></canvas>
+<canvas id="view"></canvas>
 
-<!-- POSITION + DIMENSION -->
+<div class="panel">
+
 <div class="row">
-
-<div class="group">
-<h3>Position</h3>
-<label>X</label><input id="x" value="0">
-<label>Y</label><input id="y" value="0">
-<label>Z</label><input id="z" value="0">
+<div>
+<h4>Position</h4>
+<input id="px" value="0">
+<input id="py" value="0">
+<input id="pz" value="0">
 </div>
 
-<div class="group">
-<h3>Dimension</h3>
-<label>Length [mm]</label><input id="dx" value="0">
-<label>Width [mm]</label><input id="dy" value="0">
-<label>Height [mm]</label><input id="dz" value="0">
-</div>
-
-</div>
-
-<!-- CORNER -->
-<div class="group">
-<h3>Corner Radius</h3>
-<div class="frad">
-<input id="f1" value="150">
-<input id="f2" value="150">
-<input id="f3" value="150">
-<input id="f4" value="150">
+<div>
+<h4>Dimension</h4>
+<input id="dx" value="0">
+<input id="dy" value="0">
+<input id="dz" value="0">
 </div>
 </div>
 
-<!-- ORIENTATION -->
-<div class="group">
-<h3>Orientation</h3>
-<div class="radio-group">
-<label><input type="radio" name="axis" value="X"> X</label>
-<label><input type="radio" name="axis" value="Y"> Y</label>
-<label><input type="radio" name="axis" value="Z" checked> Z</label>
+<div>
+<h4>Corner Radius</h4>
+<div class="radius">
+<label>R1<input id="r1" value="150"></label>
+<label>R2<input id="r2" value="150"></label>
+<label>R3<input id="r3" value="150"></label>
+<label>R4<input id="r4" value="150"></label>
 </div>
 </div>
 
-<!-- BUTTON -->
-<div class="buttons">
-<button class="btn primary" onclick="saveFile()">OK</button>
-<button class="btn voice" onclick="startVoice()">🎤 Voice</button>
-<button class="btn info" onclick="help()">Help</button>
-<button class="btn danger" onclick="resetForm()">Reset</button>
+<div>
+<h4>Orientation</h4>
+<div class="ori">
+<button onclick="setOri('X')" id="ox">X</button>
+<button onclick="setOri('Y')" id="oy">Y</button>
+<button onclick="setOri('Z')" id="oz" class="active">Z</button>
+</div>
 </div>
 
-<!-- CHAT -->
-<div class="chat" id="chat"></div>
+<div class="btns">
+<button class="ok" onclick="saveFile()">OK</button>
+<button class="voice" onclick="voice()">🎤 Voice</button>
+<button class="help" onclick="help()">Help</button>
+<button class="reset" onclick="reset()">Reset</button>
+</div>
+
+<div id="chat"></div>
+
+</div>
 
 </div>
 
