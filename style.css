@@ -57,17 +57,28 @@ input {
 }
 
 .primary { background: #2d89ef; }
-.secondary { background: #6c757d; }
+.voice { background: #9b59b6; }
 .info { background: #17a2b8; }
 .danger { background: #e74c3c; }
-.voice { background: #9b59b6; }
 
 .btn:hover {
     transform: translateY(-2px);
 }
 
-#voiceStatus {
-    margin-top: 10px;
-    font-weight: bold;
-    color: #333;
+/* CHAT */
+.chatbox {
+    margin-top: 20px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 10px;
+    height: 200px;
+    overflow-y: auto;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.chat-msg {
+    padding: 6px 10px;
+    margin: 5px 0;
+    border-radius: 6px;
+    background: #eef2f7;
 }
