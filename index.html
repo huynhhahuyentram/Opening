@@ -1,24 +1,116 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>CREATE 3D OPENING</title>
-<link rel="stylesheet" href="style.css">
+
+<style>
+body {
+    font-family: Arial;
+    background: #eef2f7;
+    margin: 0;
+    padding: 20px;
+}
+
+/* ===== CONTAINER ===== */
+.container {
+    max-width: 900px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+/* ===== IMAGE ===== */
+#banner {
+    width: 100%;
+    max-height: 180px;
+    object-fit: contain;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+/* ===== GROUP ===== */
+.group {
+    background: #f5f7fa;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+.group h3 {
+    margin-bottom: 10px;
+}
+
+/* ===== GRID ===== */
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+/* ===== INPUT ===== */
+input {
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+/* ===== BUTTON ===== */
+.buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+button {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #007bff;
+    color: white;
+}
+
+button:hover {
+    background: #0056b3;
+}
+</style>
 </head>
 
 <body>
+
 <div class="container">
 
-<!-- IMAGE -->
-<div class="image-box">
+<!-- ===== IMAGE ===== -->
 <img id="banner"
-src="https://drive.google.com/uc?export=view&id=1uZGN6ycXnPaFnK3Ace7UrgM7U5BZniIe"
-referrerpolicy="no-referrer"
-onerror="this.src='https://via.placeholder.com/900x200?text=NO+IMAGE';">
-</div>
+src="https://raw.githubusercontent.com/huynhhahuyentram/Opening/main/aveva.png"
+onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,
+<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;900&quot; height=&quot;200&quot;>
+<rect width=&quot;100%&quot; height=&quot;100%&quot; fill=&quot;#ddd&quot;/>
+<text x=&quot;50%&quot; y=&quot;50%&quot; dominant-baseline=&quot;middle&quot; text-anchor=&quot;middle&quot; font-size=&quot;22&quot; fill=&quot;#555&quot;>
+NO IMAGE
+</text>
+</svg>';">
+    
+<h2>CREATE 3D OPENING</h2>
 
-<!-- POSITION + DIMENSION -->
-<div class="row">
+<!-- ===== POSITION + DIMENSION ===== -->
+<div class="grid-2">
 
 <div class="group">
 <h3>Position</h3>
@@ -37,49 +129,109 @@ onerror="this.src='https://via.placeholder.com/900x200?text=NO+IMAGE';">
 <h3>Dimension</h3>
 
 <label>Length [mm]</label>
-<input id="dx">
+<input id="length">
 
 <label>Width [mm]</label>
-<input id="dy">
+<input id="width">
 
 <label>Height [mm]</label>
-<input id="dz">
+<input id="height">
 </div>
 
 </div>
 
-<!-- CORNER -->
+<!-- ===== CORNER ===== -->
 <div class="group">
 <h3>Corner Radius</h3>
 
-<div class="frad">
-<div><label>R1</label><input id="f1" value="150"></div>
-<div><label>R2</label><input id="f2" value="150"></div>
-<div><label>R3</label><input id="f3" value="150"></div>
-<div><label>R4</label><input id="f4" value="150"></div>
+<div class="grid-4">
+<div>
+<label>R1</label>
+<input id="r1" value="150">
+</div>
+
+<div>
+<label>R2</label>
+<input id="r2" value="150">
+</div>
+
+<div>
+<label>R3</label>
+<input id="r3" value="150">
+</div>
+
+<div>
+<label>R4</label>
+<input id="r4" value="150">
+</div>
 </div>
 </div>
 
-<!-- ORIENTATION -->
-<div class="group">
-<h3>Orientation</h3>
-<div class="radio-group">
-<label><input type="radio" name="axis" value="X"> X</label>
-<label><input type="radio" name="axis" value="Y"> Y</label>
-<label><input type="radio" name="axis" value="Z" checked> Z</label>
-</div>
-</div>
-
-<!-- BUTTON -->
+<!-- ===== BUTTON ===== -->
 <div class="buttons">
-<button class="btn primary" onclick="saveFile()">OK</button>
-<button class="btn voice" onclick="startVoice()">🎤 Voice</button>
-<button class="btn info" onclick="openHelp()">Help</button>
-<button class="btn danger" onclick="resetForm()">Reset</button>
+<button onclick="create()">Create</button>
+<button onclick="resetForm()">Reset</button>
+<button onclick="help()">Help</button>
+<button onclick="voice()">Voice</button>
 </div>
 
 </div>
 
-<script src="script.js"></script>
+<script>
+function resetForm() {
+    document.getElementById("x").value = 0;
+    document.getElementById("y").value = 0;
+    document.getElementById("z").value = 0;
+
+    document.getElementById("r1").value = 150;
+    document.getElementById("r2").value = 150;
+    document.getElementById("r3").value = 150;
+    document.getElementById("r4").value = 150;
+
+    document.getElementById("length").value = "";
+    document.getElementById("width").value = "";
+    document.getElementById("height").value = "";
+}
+
+function help() {
+    window.open("https://drive.google.com", "_blank");
+}
+
+function create() {
+    alert("Created!");
+}
+
+/* ===== VOICE ===== */
+function voice() {
+    alert("Xin chào, tôi có thể giúp gì cho bạn");
+
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = "vi-VN";
+    recognition.interimResults = false;
+
+    recognition.start();
+
+    recognition.onresult = function(event) {
+        let text = event.results[0][0].transcript.toLowerCase();
+
+        let nums = text.match(/\d+/g);
+        if (!nums) return;
+
+        document.getElementById("x").value = nums[0] || 0;
+        document.getElementById("y").value = nums[1] || 0;
+        document.getElementById("z").value = nums[2] || 0;
+
+        alert("File của bạn đã được tạo xong");
+
+        setTimeout(() => {
+            let link = document.createElement('a');
+            link.download = "opening.txt";
+            link.href = "data:text/plain,Created";
+            link.click();
+        }, 500);
+    };
+}
+</script>
+
 </body>
 </html>
