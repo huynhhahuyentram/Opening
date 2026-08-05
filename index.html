@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CREATE 3D OPENING</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+
+    <!-- IMAGE -->
+    <div class="image-box">
+        <img id="banner" src="https://drive.google.com/uc?export=view&id=1uZGN6ycXnPaFnK3Ace7UrgM7U5BZniIe">
+    </div>
+
+    <!-- POSITION + DIMENSIONS -->
+    <div class="row">
+        <div class="group">
+            <h3>Position</h3>
+            <label>X [mm]</label><input id="x" type="number">
+            <label>Y [mm]</label><input id="y" type="number">
+            <label>Z [mm]</label><input id="z" type="number">
+        </div>
+
+        <div class="group">
+            <h3>Dimensions</h3>
+            <label>Length dX [mm]</label><input id="dx" type="number">
+            <label>Width dY [mm]</label><input id="dy" type="number">
+            <label>Height dZ [mm]</label><input id="dz" type="number">
+        </div>
+    </div>
+
+    <!-- FRAD -->
+    <div class="group">
+        <h3>Corner Radius</h3>
+        <div class="frad">
+            <input id="f1" value="150">
+            <input id="f2" value="150">
+            <input id="f3" value="150">
+            <input id="f4" value="150">
+        </div>
+    </div>
+
+    <!-- AXIS -->
+    <div class="group">
+        <h3>Orientation</h3>
+        <label><input type="radio" name="axis" value="X"> X</label>
+        <label><input type="radio" name="axis" value="Y"> Y</label>
+        <label><input type="radio" name="axis" value="Z" checked> Z</label>
+    </div>
+
+    <!-- BUTTON -->
+    <div class="buttons">
+        <button onclick="saveFile()">OK</button>
+        <button onclick="autoSave()">Auto</button>
+        <button onclick="openHelp()">Help</button>
+        <button onclick="resetForm()">Close</button>
+    </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
