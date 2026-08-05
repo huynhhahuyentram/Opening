@@ -15,7 +15,7 @@ function startVoice() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-        alert("Browser không hỗ trợ voice!");
+        alert("Browser không hỗ trợ Voice!");
         return;
     }
 
@@ -32,13 +32,18 @@ function startVoice() {
         let interim = "";
 
         for (let i = event.resultIndex; i < event.results.length; i++) {
-            let t = event.results[i][0].transcript;
-            if (event.results[i].isFinal) finalTranscript += t + " ";
-            else interim += t;
+            let text = event.results[i][0].transcript;
+
+            if (event.results[i].isFinal) {
+                finalTranscript += text + " ";
+            } else {
+                interim += text;
+            }
         }
 
         clearTimeout(silenceTimer);
 
+        // ⏱️ chờ người dùng ngừng nói
         silenceTimer = setTimeout(() => {
             recognition.stop();
             processVoice(finalTranscript);
@@ -51,7 +56,6 @@ function startVoice() {
 // ================= NLP =================
 function processVoice(text) {
     text = text.toLowerCase();
-
     addChat("🗣️ " + text);
 
     const patterns = [
@@ -138,6 +142,7 @@ END`;
 function saveFile() {
     let content = generateMAC(getData());
     let blob = new Blob([content]);
+
     let a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = "opening.mac";
@@ -149,10 +154,24 @@ function openHelp() {
 }
 
 function resetForm() {
-    document.querySelectorAll("input").forEach(i => {
-        if (i.type === "radio") i.checked = i.value === "Z";
-        else i.value = "";
-    });
+    // Position default
+    x.value = 0;
+    y.value = 0;
+    z.value = 0;
 
-    addChat("🔄 Reset dữ liệu");
+    // Dimension clear
+    dx.value = "";
+    dy.value = "";
+    dz.value = "";
+
+    // Radius default
+    f1.value = 150;
+    f2.value = 150;
+    f3.value = 150;
+    f4.value = 150;
+
+    // Axis default
+    document.querySelector('input[value="Z"]').checked = true;
+
+    addChat("🔄 Reset về mặc định");
 }
