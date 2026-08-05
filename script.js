@@ -1,162 +1,145 @@
-// ================= SPEAK =================
-function speak(text) {
-    const msg = new SpeechSynthesisUtterance(text);
-    msg.lang = "vi-VN";
-    msg.rate = 1;
-    msg.pitch = 1;
-    speechSynthesis.cancel(); // tránh chồng tiếng
-    speechSynthesis.speak(msg);
+const canvas = document.getElementById("canvas3d");
+const ctx = canvas.getContext("2d");
+
+/* DRAW 3D */
+function draw(){
+    canvas.width = canvas.offsetWidth;
+    canvas.height = 230;
+
+    let L = +dx.value || 0;
+    let W = +dy.value || 0;
+    let H = +dz.value || 0;
+
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    let scale = 0.6;
+    let x = 150, y = 120;
+
+    let l=L*scale,w=W*scale,h=H*scale;
+
+    ctx.strokeRect(x,y,l,h);
+
+    ctx.beginPath();
+    ctx.moveTo(x,y);
+    ctx.lineTo(x+w,y-w/2);
+    ctx.lineTo(x+l+w,y-w/2);
+    ctx.lineTo(x+l,y);
+    ctx.closePath();
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(x+l,y);
+    ctx.lineTo(x+l+w,y-w/2);
+    ctx.lineTo(x+l+w,y+h-w/2);
+    ctx.lineTo(x+l,y+h);
+    ctx.closePath();
+    ctx.stroke();
+
+    /* TEXT */
+    ctx.fillText("L="+L, x+l/2, y+h+15);
+    ctx.fillText("W="+W, x+l+w/2, y-h/2);
+    ctx.fillText("H="+H, x-40, y+h/2);
 }
 
-// ================= VOICE =================
-let recognition;
-let silenceTimer;
-let finalText = "";
+/* INPUT EVENT */
+document.querySelectorAll("input").forEach(i=>{
+    i.addEventListener("input", draw);
+});
 
-function startVoice() {
+/* CHAT */
+function log(msg){
+    let chat=document.getElementById("chat");
+    chat.innerHTML += "<div>"+msg+"</div>";
+    chat.scrollTop = chat.scrollHeight;
+}
+
+/* SPEAK */
+function speak(t){
+    let u=new SpeechSynthesisUtterance(t);
+    u.lang="vi-VN";
+    speechSynthesis.speak(u);
+}
+
+/* VOICE */
+function startVoice(){
     speak("Xin chào, tôi có thể giúp gì cho bạn");
 
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let r=new SR();
 
-    if (!SR) {
-        alert("Trình duyệt không hỗ trợ voice!");
-        return;
-    }
+    r.lang="vi-VN";
+    r.interimResults=true;
 
-    recognition = new SR();
-    recognition.lang = "vi-VN";
-    recognition.continuous = true;
-    recognition.interimResults = true;
+    let final="";
 
-    finalText = "";
-
-    recognition.onresult = (e) => {
-        let interim = "";
-
-        for (let i = e.resultIndex; i < e.results.length; i++) {
-            let t = e.results[i][0].transcript;
-
-            if (e.results[i].isFinal) {
-                finalText += " " + t;
-            } else {
-                interim += t;
+    r.onresult=e=>{
+        for(let i=e.resultIndex;i<e.results.length;i++){
+            if(e.results[i].isFinal){
+                final+=e.results[i][0].transcript;
             }
         }
 
-        // reset timer khi còn nói
-        clearTimeout(silenceTimer);
-
-        silenceTimer = setTimeout(() => {
-            recognition.stop();
-            processVoice(finalText);
-        }, 3000); // ⬅ tăng delay để nói tự nhiên hơn
+        clearTimeout(window.t);
+        window.t=setTimeout(()=>{
+            r.stop();
+            processVoice(final);
+        },2500);
     };
 
-    recognition.onerror = (e) => {
-        console.error(e);
-        speak("Có lỗi xảy ra, vui lòng thử lại");
-    };
-
-    recognition.start();
+    r.start();
 }
 
-// ================= NLP =================
-function processVoice(text) {
-    text = text.toLowerCase();
+/* PROCESS VOICE */
+function processVoice(t){
+    log("👤 "+t);
 
-    console.log("VOICE:", text);
+    let nums=t.match(/\d+/g);
+    if(nums){
+        dx.value=nums[0]||0;
+        dy.value=nums[1]||0;
+        dz.value=nums[2]||0;
+    }
 
-    // chuẩn hóa tiếng Việt
-    text = text
-        .replace(/dài/g, "length")
-        .replace(/rộng/g, "width")
-        .replace(/cao/g, "height");
+    draw();
 
-    const patterns = [
-        { key: "x", id: "x" },
-        { key: "y", id: "y" },
-        { key: "z", id: "z" },
-        { key: "length", id: "dx" },
-        { key: "width", id: "dy" },
-        { key: "height", id: "dz" }
-    ];
+    speak("Đã tạo file");
+    log("🤖 File created");
 
-    patterns.forEach(p => {
-        let regex = new RegExp(`${p.key}[^0-9-]*(\\d+)`);
-        let match = text.match(regex);
-
-        if (match) {
-            document.getElementById(p.id).value = match[1];
-        }
-    });
-
-    speak("File của bạn đã được tạo xong");
-
-    setTimeout(() => {
-        saveFile();
-    }, 800);
+    setTimeout(saveFile,800);
 }
 
-// ================= GENERATE =================
-function getVal(id, def = 150) {
-    let v = document.getElementById(id).value;
-    return v ? parseFloat(v) : def;
-}
+/* SAVE FILE */
+function saveFile(){
+    let data=`POS ${x.value} ${y.value} ${z.value}
+SIZE ${dx.value} ${dy.value} ${dz.value}`;
 
-function getData() {
-    return {
-        x: +x.value || 0,
-        y: +y.value || 0,
-        z: +z.value || 0,
-        dx: +dx.value || 0,
-        dy: +dy.value || 0,
-        dz: +dz.value || 0,
-        r1: getVal("f1"),
-        r2: getVal("f2"),
-        r3: getVal("f3"),
-        r4: getVal("f4"),
-        axis: document.querySelector('input[name="axis"]:checked').value
-    };
-}
+    let blob=new Blob([data],{type:"text/plain"});
+    let a=document.createElement("a");
 
-function generateMAC(d) {
-    return `POS X ${d.x} Y ${d.y} Z ${d.z}
-SIZE ${d.dx} ${d.dy} ${d.dz}
-RADIUS ${d.r1} ${d.r2} ${d.r3} ${d.r4}
-AXIS ${d.axis}`;
-}
-
-// ================= SAVE =================
-function saveFile() {
-    let blob = new Blob([generateMAC(getData())], { type: "text/plain;charset=utf-8" });
-
-    let a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "opening.mac";
+    a.href=URL.createObjectURL(blob);
+    a.download="opening.mac";
 
     document.body.appendChild(a);
     a.click();
-    document.body.removeChild(a);
+
+    setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 }
 
-// ================= RESET =================
-function resetForm() {
-    // Position
-    x.value = 0;
-    y.value = 0;
-    z.value = 0;
+/* RESET */
+function resetForm(){
+    x.value=y.value=z.value=0;
+    dx.value=dy.value=dz.value=0;
 
-    // Dimension
-    dx.value = "";
-    dy.value = "";
-    dz.value = "";
+    f1.value=f2.value=f3.value=f4.value=150;
 
-    // Radius
-    f1.value = 150;
-    f2.value = 150;
-    f3.value = 150;
-    f4.value = 150;
+    document.querySelector('input[value="Z"]').checked=true;
 
-    // Axis default
-    document.querySelector('input[value="Z"]').checked = true;
+    draw();
 }
+
+/* HELP */
+function help(){
+    window.open("https://drive.google.com","_blank");
+}
+
+draw();
