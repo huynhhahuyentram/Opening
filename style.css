@@ -1,5 +1,5 @@
 body {
-    font-family: Segoe UI;
+    font-family: "Segoe UI", sans-serif;
     background: linear-gradient(135deg, #eef2f7, #d9e4f5);
 }
 
@@ -21,7 +21,7 @@ body {
 
 .group {
     flex: 1;
-    background: rgba(255,255,255,0.9);
+    background: rgba(255,255,255,0.95);
     padding: 20px;
     border-radius: 12px;
     margin-top: 15px;
@@ -38,7 +38,11 @@ input {
 
 .frad {
     display: flex;
-    gap: 10px;
+    gap: 15px;
+}
+
+.frad div {
+    flex: 1;
 }
 
 .buttons {
@@ -54,6 +58,7 @@ input {
     border: none;
     color: white;
     cursor: pointer;
+    font-size: 14px;
 }
 
 .primary { background: #2d89ef; }
