@@ -1,3 +1,11 @@
+// ================= CHAT =================
+function addChat(msg) {
+    let div = document.createElement("div");
+    div.className = "chat-msg";
+    div.innerText = msg;
+    document.getElementById("chatLog").appendChild(div);
+}
+
 // ================= VOICE =================
 let recognition;
 let finalTranscript = "";
@@ -12,72 +20,60 @@ function startVoice() {
     }
 
     recognition = new SpeechRecognition();
-    recognition.lang = "vi-VN"; // hỗ trợ tiếng Việt
+    recognition.lang = "vi-VN";
     recognition.interimResults = true;
     recognition.continuous = true;
 
     finalTranscript = "";
 
-    recognition.onstart = () => {
-        document.getElementById("voiceStatus").innerText = "🎤 Đang nghe...";
-    };
+    recognition.onstart = () => addChat("🎤 Đang nghe...");
 
     recognition.onresult = (event) => {
         let interim = "";
 
         for (let i = event.resultIndex; i < event.results.length; i++) {
-            let transcript = event.results[i][0].transcript;
-
-            if (event.results[i].isFinal) {
-                finalTranscript += transcript + " ";
-            } else {
-                interim += transcript;
-            }
+            let t = event.results[i][0].transcript;
+            if (event.results[i].isFinal) finalTranscript += t + " ";
+            else interim += t;
         }
 
-        document.getElementById("voiceStatus").innerText =
-            "Nghe: " + finalTranscript + interim;
-
-        // reset timer khi người dùng vẫn nói
         clearTimeout(silenceTimer);
 
         silenceTimer = setTimeout(() => {
             recognition.stop();
             processVoice(finalTranscript);
-        }, 2000); // đợi 2s im lặng mới xử lý
-    };
-
-    recognition.onend = () => {
-        document.getElementById("voiceStatus").innerText += " ✅ Done";
+        }, 3000);
     };
 
     recognition.start();
 }
 
-// ================= PARSE VOICE =================
+// ================= NLP =================
 function processVoice(text) {
     text = text.toLowerCase();
 
-    console.log("VOICE:", text);
+    addChat("🗣️ " + text);
 
-    function extract(keyword) {
-        let regex = new RegExp(keyword + "\\s*(\\d+)", "i");
-        let match = text.match(regex);
-        return match ? match[1] : null;
-    }
+    const patterns = [
+        { keys: ["x"], id: "x" },
+        { keys: ["y"], id: "y" },
+        { keys: ["z"], id: "z" },
+        { keys: ["dx", "length", "dài"], id: "dx" },
+        { keys: ["dy", "width", "rộng"], id: "dy" },
+        { keys: ["dz", "height", "cao"], id: "dz" }
+    ];
 
-    let map = {
-        x: extract("x"),
-        y: extract("y"),
-        z: extract("z"),
-        dx: extract("dx|length"),
-        dy: extract("dy|width"),
-        dz: extract("dz|height"),
-    };
+    patterns.forEach(p => {
+        p.keys.forEach(k => {
+            let regex = new RegExp(k + "[^0-9]*(\\d+)", "i");
+            let match = text.match(regex);
 
-    for (let key in map) {
-        if (map[key]) document.getElementById(key).value = map[key];
-    }
+            if (match) {
+                document.getElementById(p.id).value = match[1];
+                addChat(`✅ ${p.id.toUpperCase()} = ${match[1]}`);
+            }
+        });
+    });
 }
 
 // ================= LOGIC =================
@@ -148,20 +144,15 @@ function saveFile() {
     a.click();
 }
 
-function autoSave() {
-    saveFile();
-}
-
 function openHelp() {
     window.open("https://drive.google.com/file/d/14NNDzXSCG63m1yQZb51tZhrZfd5k8KPf/view");
 }
 
 function resetForm() {
     document.querySelectorAll("input").forEach(i => {
-        if (i.type === "radio") {
-            i.checked = i.value === "Z";
-        } else {
-            i.value = "";
-        }
+        if (i.type === "radio") i.checked = i.value === "Z";
+        else i.value = "";
     });
+
+    addChat("🔄 Reset dữ liệu");
 }
