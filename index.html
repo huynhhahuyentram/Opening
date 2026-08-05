@@ -13,7 +13,12 @@
     <div class="image-box">
         <img id="banner"
              src="https://drive.google.com/uc?export=download&id=1uZGN6ycXnPaFnK3Ace7UrgM7U5BZniIe"
-             onerror="this.src='https://via.placeholder.com/700x200?text=Image+Error'">
+             onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,
+             <svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;700&quot; height=&quot;200&quot;>
+             <rect width=&quot;100%&quot; height=&quot;100%&quot; fill=&quot;#ddd&quot;/>
+             <text x=&quot;50%&quot; y=&quot;50%&quot; dominant-baseline=&quot;middle&quot; text-anchor=&quot;middle&quot; font-size=&quot;20&quot; fill=&quot;#555&quot;>
+             IMAGE NOT AVAILABLE
+             </text></svg>';">
     </div>
 
     <!-- POSITION + DIMENSIONS -->
@@ -55,13 +60,15 @@
     <!-- BUTTON -->
     <div class="buttons">
         <button class="btn primary" onclick="saveFile()">OK</button>
-        <button class="btn secondary" onclick="autoSave()">Auto</button>
         <button class="btn voice" onclick="startVoice()">🎤 Voice</button>
         <button class="btn info" onclick="openHelp()">Help</button>
         <button class="btn danger" onclick="resetForm()">Reset</button>
     </div>
 
-    <div id="voiceStatus"></div>
+    <!-- CHATBOX -->
+    <div class="chatbox">
+        <div id="chatLog"></div>
+    </div>
 
 </div>
 
