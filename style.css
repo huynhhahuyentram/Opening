@@ -1,6 +1,7 @@
 body{
 font-family:Segoe UI;
 background:#eef2f7;
+font-size:14px;
 }
 
 .app{
@@ -18,8 +19,8 @@ border-radius:10px;
 .panel{
 background:#fff;
 padding:15px;
-border-radius:10px;
 margin-top:10px;
+border-radius:10px;
 }
 
 .row{
@@ -27,34 +28,44 @@ display:flex;
 gap:20px;
 }
 
+.box{
+flex:1;
+}
+
+label{
+display:block;
+margin-top:5px;
+}
+
 input{
 width:80px;
-height:30px;
-margin:3px;
+height:32px;
+margin-bottom:5px;
+font-size:14px;
 }
 
 .radius{
 display:flex;
-gap:10px;
+gap:20px;
 }
 
 .radius label{
 display:flex;
 flex-direction:column;
-font-size:12px;
+align-items:center;
 }
 
 .ori{
 display:flex;
+justify-content:center;
 gap:20px;
-margin-top:10px;
 }
 
 .ori button{
 width:60px;
 height:35px;
-border-radius:6px;
 border:none;
+border-radius:6px;
 background:#ccc;
 }
 
@@ -71,7 +82,7 @@ margin-top:10px;
 
 .btns button{
 flex:1;
-height:38px;
+height:40px;
 border:none;
 border-radius:6px;
 color:#fff;
@@ -86,7 +97,7 @@ color:#fff;
 height:120px;
 margin-top:10px;
 background:#fafafa;
-padding:8px;
+padding:10px;
 overflow:auto;
-font-size:12px;
+font-size:13px;
 }
