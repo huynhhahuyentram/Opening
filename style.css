@@ -1,113 +1,94 @@
 body {
     font-family: "Segoe UI";
     background: linear-gradient(135deg,#eef2f7,#d9e4f5);
-    margin: 0;
 }
 
-/* ===== CONTAINER ===== */
 .container {
-    max-width: 1000px;
+    width: 900px;
     margin: 30px auto;
-    padding: 0 15px;
 }
 
-/* ===== IMAGE ===== */
-.image-box img {
+/* CANVAS */
+#canvas3d {
     width: 100%;
-    max-height: 180px;
-    object-fit: contain;
-    border-radius: 10px;
-}
-
-/* ===== LAYOUT ===== */
-.row {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap; /* FIX chèn nhau */
-}
-
-/* ===== GROUP BOX ===== */
-.group {
-    flex: 1;
-    min-width: 300px;
+    height: 230px;
     background: #fff;
-    padding: 18px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+}
+
+/* GROUP */
+.group {
+    background: #fff;
+    padding: 20px;
     border-radius: 12px;
     margin-top: 15px;
     box-shadow: 0 3px 12px rgba(0,0,0,0.1);
 }
 
-/* ===== TITLE ===== */
-.group h3 {
-    margin-bottom: 10px;
-    font-size: 16px;
+/* ROW */
+.row {
+    display: flex;
+    gap: 20px;
 }
 
-/* ===== LABEL ===== */
-label {
-    font-size: 13px;
-    font-weight: 500;
-    display: block;
-    margin-bottom: 3px;
-}
-
-/* ===== INPUT ===== */
+/* INPUT */
 input {
     width: 100%;
     height: 36px;
-    padding: 6px 10px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     border-radius: 6px;
     border: 1px solid #ccc;
-    box-sizing: border-box;
-    transition: 0.2s;
+    padding-left: 8px;
 }
 
-input:focus {
-    border-color: #2d89ef;
-    outline: none;
-    box-shadow: 0 0 4px rgba(45,136,239,0.4);
-}
-
-/* ===== CORNER GRID ===== */
+/* CORNER */
 .frad {
     display: grid;
     grid-template-columns: repeat(4,1fr);
-    gap: 12px;
+    gap: 10px;
 }
 
-/* ===== RADIO ===== */
+/* RADIO */
 .radio-group {
     display: flex;
-    gap: 30px;
-    align-items: center;
+    flex-direction: column;
+    gap: 10px;
 }
 
-/* ===== BUTTON ===== */
+/* BUTTON */
 .buttons {
     display: flex;
     gap: 10px;
-    margin-top: 20px;
+    margin-top: 15px;
 }
 
 .btn {
     flex: 1;
     height: 42px;
-    border-radius: 8px;
     border: none;
+    border-radius: 8px;
     color: white;
     cursor: pointer;
-    font-weight: 500;
-    transition: 0.2s;
+    font-size: 14px;
 }
 
-/* ===== COLORS ===== */
 .primary {background:#2d89ef;}
 .voice {background:#9b59b6;}
 .info {background:#17a2b8;}
 .danger {background:#e74c3c;}
 
 .btn:hover {
-    transform: translateY(-2px);
-    opacity: 0.9;
+    opacity: 0.85;
+}
+
+/* CHAT */
+.chat {
+    background: #fff;
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 10px;
+    height: 120px;
+    overflow-y: auto;
+    font-size: 13px;
 }
