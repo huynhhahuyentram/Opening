@@ -3,10 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <title>Opening Tool</title>
-
 <link rel="stylesheet" href="style.css">
-
 </head>
+
 <body>
 
 <div class="app">
@@ -16,23 +15,25 @@
 <div class="panel">
 
 <div class="row">
-<div>
-<h4>Position</h4>
-<input id="px" value="0">
-<input id="py" value="0">
-<input id="pz" value="0">
+
+<div class="box">
+<h3>Position</h3>
+<label>X</label><input id="px" value="0">
+<label>Y</label><input id="py" value="0">
+<label>Z</label><input id="pz" value="0">
 </div>
 
-<div>
-<h4>Dimension</h4>
-<input id="dx" value="0">
-<input id="dy" value="0">
-<input id="dz" value="0">
-</div>
+<div class="box">
+<h3>Dimension</h3>
+<label>L</label><input id="dx" value="0">
+<label>W</label><input id="dy" value="0">
+<label>H</label><input id="dz" value="0">
 </div>
 
-<div>
-<h4>Corner Radius</h4>
+</div>
+
+<div class="box">
+<h3>Corner Radius</h3>
 <div class="radius">
 <label>R1<input id="r1" value="150"></label>
 <label>R2<input id="r2" value="150"></label>
@@ -41,8 +42,8 @@
 </div>
 </div>
 
-<div>
-<h4>Orientation</h4>
+<div class="box">
+<h3>Orientation</h3>
 <div class="ori">
 <button onclick="setOri('X')" id="ox">X</button>
 <button onclick="setOri('Y')" id="oy">Y</button>
@@ -64,6 +65,5 @@
 </div>
 
 <script src="script.js"></script>
-
 </body>
 </html>
