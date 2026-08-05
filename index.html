@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <title>CREATE 3D OPENING</title>
@@ -11,23 +11,25 @@
 
     <!-- IMAGE -->
     <div class="image-box">
-        <img id="banner" src="https://drive.google.com/uc?export=view&id=1uZGN6ycXnPaFnK3Ace7UrgM7U5BZniIe">
+        <img id="banner"
+             src="https://drive.google.com/uc?export=download&id=1uZGN6ycXnPaFnK3Ace7UrgM7U5BZniIe"
+             onerror="this.src='https://via.placeholder.com/700x200?text=Image+Error'">
     </div>
 
     <!-- POSITION + DIMENSIONS -->
     <div class="row">
         <div class="group">
             <h3>Position</h3>
-            <label>X [mm]</label><input id="x" type="number">
-            <label>Y [mm]</label><input id="y" type="number">
-            <label>Z [mm]</label><input id="z" type="number">
+            <label>X [mm]</label><input id="x">
+            <label>Y [mm]</label><input id="y">
+            <label>Z [mm]</label><input id="z">
         </div>
 
         <div class="group">
             <h3>Dimensions</h3>
-            <label>Length dX [mm]</label><input id="dx" type="number">
-            <label>Width dY [mm]</label><input id="dy" type="number">
-            <label>Height dZ [mm]</label><input id="dz" type="number">
+            <label>dX</label><input id="dx">
+            <label>dY</label><input id="dy">
+            <label>dZ</label><input id="dz">
         </div>
     </div>
 
@@ -52,11 +54,14 @@
 
     <!-- BUTTON -->
     <div class="buttons">
-        <button onclick="saveFile()">OK</button>
-        <button onclick="autoSave()">Auto</button>
-        <button onclick="openHelp()">Help</button>
-        <button onclick="resetForm()">Close</button>
+        <button class="btn primary" onclick="saveFile()">OK</button>
+        <button class="btn secondary" onclick="autoSave()">Auto</button>
+        <button class="btn voice" onclick="startVoice()">🎤 Voice</button>
+        <button class="btn info" onclick="openHelp()">Help</button>
+        <button class="btn danger" onclick="resetForm()">Reset</button>
     </div>
+
+    <div id="voiceStatus"></div>
 
 </div>
 
