@@ -1,83 +1,73 @@
-function getOrientation(axis) {
-    if (axis === "X")
-        return ["ORI Y is Y and Z is X", "ORI Y is -Y and Z is Z"];
-    if (axis === "Y")
-        return ["ORI Y is -X and Z is Y", "ORI Y is -Y and Z is Z"];
-    return ["ORI Y is Y and Z is Z", "ORI Y is -Y and Z is Z"];
+body {
+    font-family: Segoe UI;
+    background: linear-gradient(135deg, #eef2f7, #d9e4f5);
 }
 
-function getVal(id, def = 150) {
-    let v = document.getElementById(id).value;
-    return v ? parseFloat(v) : def;
+.container {
+    width: 900px;
+    margin: 40px auto;
 }
 
-function getData() {
-    return {
-        x: parseFloat(x.value || 0),
-        y: parseFloat(y.value || 0),
-        z: parseFloat(z.value || 0),
-        dx: parseFloat(dx.value || 0),
-        dy: parseFloat(dy.value || 0),
-        dz: parseFloat(dz.value || 0),
-        r1: getVal("f1"),
-        r2: getVal("f2"),
-        r3: getVal("f3"),
-        r4: getVal("f4"),
-        axis: document.querySelector('input[name="axis"]:checked').value
-    };
+.image-box img {
+    max-width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
 }
 
-function generateMAC(d) {
-    let [ori_eq, ori_ext] = getOrientation(d.axis);
-
-    return `NEW EQUIPMENT
-POS X ${d.x}mm Y ${d.y}mm Z ${d.z}mm
-${ori_eq}
-
-NEW EXTRUSION${ori_ext}
-HEIG ${d.dz}mm
-
-NEW LOOP
-NEW VERTEX
-FRAD ${d.r1}mm
-END
-NEW VERTEX
-POS X 0mm Y ${d.dy}mm Z 0mm
-FRAD ${d.r2}mm
-END
-NEW VERTEX
-POS X ${d.dx}mm Y ${d.dy}mm Z 0mm
-FRAD ${d.r3}mm
-END
-NEW VERTEX
-POS X ${d.dx}mm Y 0mm Z 0mm
-FRAD ${d.r4}mm
-END
-END
-END`;
+.row {
+    display: flex;
+    gap: 20px;
 }
 
-function saveFile() {
-    let content = generateMAC(getData());
-
-    let blob = new Blob([content], { type: "text/plain" });
-    let a = document.createElement("a");
-
-    a.href = URL.createObjectURL(blob);
-    a.download = "opening.mac";
-    a.click();
+.group {
+    flex: 1;
+    background: rgba(255,255,255,0.9);
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
 }
 
-function autoSave() {
-    saveFile(); // web không ghi trực tiếp ổ C nên dùng download
+input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
 }
 
-function openHelp() {
-    window.open("https://drive.google.com/file/d/14NNDzXSCG63m1yQZb51tZhrZfd5k8KPf/view");
+.frad {
+    display: flex;
+    gap: 10px;
 }
 
-function resetForm() {
-    document.querySelectorAll("input").forEach(i => {
-        if (i.type !== "radio") i.value = "";
-    });
+.buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn {
+    flex: 1;
+    height: 45px;
+    border-radius: 8px;
+    border: none;
+    color: white;
+    cursor: pointer;
+}
+
+.primary { background: #2d89ef; }
+.secondary { background: #6c757d; }
+.info { background: #17a2b8; }
+.danger { background: #e74c3c; }
+.voice { background: #9b59b6; }
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+#voiceStatus {
+    margin-top: 10px;
+    font-weight: bold;
+    color: #333;
 }
