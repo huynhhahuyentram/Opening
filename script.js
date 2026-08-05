@@ -1,53 +1,38 @@
-// ================= CHAT =================
-function addChat(msg) {
-    let div = document.createElement("div");
-    div.className = "chat-msg";
-    div.innerText = msg;
-    document.getElementById("chatLog").appendChild(div);
+// ================= SPEAK =================
+function speak(text) {
+    const msg = new SpeechSynthesisUtterance(text);
+    msg.lang = "vi-VN";
+    speechSynthesis.speak(msg);
 }
 
 // ================= VOICE =================
 let recognition;
-let finalTranscript = "";
 let silenceTimer;
+let finalText = "";
 
 function startVoice() {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    speak("Xin chào, tôi có thể giúp gì cho bạn");
 
-    if (!SpeechRecognition) {
-        alert("Browser không hỗ trợ Voice!");
-        return;
-    }
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SR();
 
-    recognition = new SpeechRecognition();
     recognition.lang = "vi-VN";
-    recognition.interimResults = true;
     recognition.continuous = true;
+    recognition.interimResults = true;
 
-    finalTranscript = "";
+    finalText = "";
 
-    recognition.onstart = () => addChat("🎤 Đang nghe...");
-
-    recognition.onresult = (event) => {
-        let interim = "";
-
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-            let text = event.results[i][0].transcript;
-
-            if (event.results[i].isFinal) {
-                finalTranscript += text + " ";
-            } else {
-                interim += text;
-            }
+    recognition.onresult = (e) => {
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+            let t = e.results[i][0].transcript;
+            if (e.results[i].isFinal) finalText += t;
         }
 
         clearTimeout(silenceTimer);
-
-        // ⏱️ chờ người dùng ngừng nói
         silenceTimer = setTimeout(() => {
             recognition.stop();
-            processVoice(finalTranscript);
-        }, 3000);
+            processVoice(finalText);
+        }, 2500);
     };
 
     recognition.start();
@@ -56,122 +41,77 @@ function startVoice() {
 // ================= NLP =================
 function processVoice(text) {
     text = text.toLowerCase();
-    addChat("🗣️ " + text);
 
-    const patterns = [
-        { keys: ["x"], id: "x" },
-        { keys: ["y"], id: "y" },
-        { keys: ["z"], id: "z" },
-        { keys: ["dx", "length", "dài"], id: "dx" },
-        { keys: ["dy", "width", "rộng"], id: "dy" },
-        { keys: ["dz", "height", "cao"], id: "dz" }
+    const map = [
+        {k:["x"], id:"x"},
+        {k:["y"], id:"y"},
+        {k:["z"], id:"z"},
+        {k:["length","dài"], id:"dx"},
+        {k:["width","rộng"], id:"dy"},
+        {k:["height","cao"], id:"dz"}
     ];
 
-    patterns.forEach(p => {
-        p.keys.forEach(k => {
-            let regex = new RegExp(k + "[^0-9]*(\\d+)", "i");
-            let match = text.match(regex);
-
-            if (match) {
-                document.getElementById(p.id).value = match[1];
-                addChat(`✅ ${p.id.toUpperCase()} = ${match[1]}`);
-            }
+    map.forEach(p=>{
+        p.k.forEach(k=>{
+            let m = text.match(new RegExp(k+"[^0-9]*(\\d+)"));
+            if(m) document.getElementById(p.id).value = m[1];
         });
     });
+
+    speak("File của bạn đã được tạo xong");
+    saveFile();
 }
 
-// ================= LOGIC =================
-function getOrientation(axis) {
-    if (axis === "X") return ["ORI Y is Y and Z is X", "ORI Y is -Y and Z is Z"];
-    if (axis === "Y") return ["ORI Y is -X and Z is Y", "ORI Y is -Y and Z is Z"];
-    return ["ORI Y is Y and Z is Z", "ORI Y is -Y and Z is Z"];
+// ================= GENERATE =================
+function getVal(id, def=150){
+    let v=document.getElementById(id).value;
+    return v?parseFloat(v):def;
 }
 
-function getVal(id, def = 150) {
-    let v = document.getElementById(id).value;
-    return v ? parseFloat(v) : def;
+function getData(){
+return{
+x:+x.value||0,
+y:+y.value||0,
+z:+z.value||0,
+dx:+dx.value||0,
+dy:+dy.value||0,
+dz:+dz.value||0,
+r1:getVal("f1"),
+r2:getVal("f2"),
+r3:getVal("f3"),
+r4:getVal("f4"),
+axis:document.querySelector('input[name="axis"]:checked').value
+};
 }
 
-function getData() {
-    return {
-        x: parseFloat(x.value || 0),
-        y: parseFloat(y.value || 0),
-        z: parseFloat(z.value || 0),
-        dx: parseFloat(dx.value || 0),
-        dy: parseFloat(dy.value || 0),
-        dz: parseFloat(dz.value || 0),
-        r1: getVal("f1"),
-        r2: getVal("f2"),
-        r3: getVal("f3"),
-        r4: getVal("f4"),
-        axis: document.querySelector('input[name="axis"]:checked').value
-    };
+function generateMAC(d){
+return `POS X ${d.x} Y ${d.y} Z ${d.z}
+SIZE ${d.dx} ${d.dy} ${d.dz}`;
 }
 
-function generateMAC(d) {
-    let [ori_eq, ori_ext] = getOrientation(d.axis);
-
-    return `NEW EQUIPMENT
-POS X ${d.x}mm Y ${d.y}mm Z ${d.z}mm
-${ori_eq}
-
-NEW EXTRUSION${ori_ext}
-HEIG ${d.dz}mm
-
-NEW LOOP
-NEW VERTEX
-FRAD ${d.r1}mm
-END
-NEW VERTEX
-POS X 0mm Y ${d.dy}mm Z 0mm
-FRAD ${d.r2}mm
-END
-NEW VERTEX
-POS X ${d.dx}mm Y ${d.dy}mm Z 0mm
-FRAD ${d.r3}mm
-END
-NEW VERTEX
-POS X ${d.dx}mm Y 0mm Z 0mm
-FRAD ${d.r4}mm
-END
-END
-END`;
+// ================= SAVE =================
+function saveFile(){
+let blob=new Blob([generateMAC(getData())]);
+let a=document.createElement("a");
+a.href=URL.createObjectURL(blob);
+a.download="opening.mac";
+a.click();
 }
 
-// ================= ACTION =================
-function saveFile() {
-    let content = generateMAC(getData());
-    let blob = new Blob([content]);
+// ================= RESET =================
+function resetForm(){
+x.value=0;
+y.value=0;
+z.value=0;
 
-    let a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "opening.mac";
-    a.click();
-}
+dx.value="";
+dy.value="";
+dz.value="";
 
-function openHelp() {
-    window.open("https://drive.google.com/file/d/14NNDzXSCG63m1yQZb51tZhrZfd5k8KPf/view");
-}
+f1.value=150;
+f2.value=150;
+f3.value=150;
+f4.value=150;
 
-function resetForm() {
-    // Position default
-    x.value = 0;
-    y.value = 0;
-    z.value = 0;
-
-    // Dimension clear
-    dx.value = "";
-    dy.value = "";
-    dz.value = "";
-
-    // Radius default
-    f1.value = 150;
-    f2.value = 150;
-    f3.value = 150;
-    f4.value = 150;
-
-    // Axis default
-    document.querySelector('input[value="Z"]').checked = true;
-
-    addChat("🔄 Reset về mặc định");
+document.querySelector('input[value="Z"]').checked=true;
 }
