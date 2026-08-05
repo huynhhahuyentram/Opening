@@ -1,7 +1,7 @@
 const c = document.getElementById("view");
 const ctx = c.getContext("2d");
 
-let ORI = "Z";
+let ORI="Z";
 
 /* ORIENTATION */
 function setOri(o){
@@ -17,44 +17,68 @@ function draw(){
 c.width=c.offsetWidth;
 c.height=260;
 
-let L=+dx.value;
-let W=+dy.value;
-let H=+dz.value;
+let L=+dx.value||1;
+let W=+dy.value||1;
+let H=+dz.value||1;
 
 ctx.clearRect(0,0,c.width,c.height);
 
-/* AUTO SCALE */
-let max=Math.max(L,W,H,1);
+/* SCALE AUTO */
+let max=Math.max(L,W,H);
 let scale=150/max;
 
-/* BASE POINT */
-let x=200,y=150;
+let cx=300, cy=150;
 
 let l=L*scale;
 let w=W*scale;
 let h=H*scale;
 
-/* PLAN */
-ctx.strokeStyle="#000";
+/* AXIS */
+drawAxis();
 
-if(ORI==="Z"){
-rect3D(x,y,l,w,h);
-}
-if(ORI==="X"){
-rect3D(x,y,w,h,l);
-}
-if(ORI==="Y"){
-rect3D(x,y,l,h,w);
-}
+/* DRAW */
+if(ORI==="Z") drawBox(cx,cy,l,w,h);
+if(ORI==="X") drawBox(cx,cy,w,h,l);
+if(ORI==="Y") drawBox(cx,cy,l,h,w);
 
-/* TEXT */
-ctx.fillText("L="+L,10,20);
-ctx.fillText("W="+W,10,35);
-ctx.fillText("H="+H,10,50);
+/* DIM TEXT */
+ctx.font="14px Segoe UI";
+ctx.fillText("L="+L, cx+l/2, cy+h+20);
+ctx.fillText("W="+W, cx+l+w/2, cy-h/2);
+ctx.fillText("H="+H, cx-50, cy+h/2);
 }
 
-/* DRAW BOX */
-function rect3D(x,y,l,w,h){
+/* DRAW AXIS */
+function drawAxis(){
+ctx.lineWidth=2;
+
+/* X đỏ */
+ctx.strokeStyle="red";
+ctx.beginPath();
+ctx.moveTo(40,200);
+ctx.lineTo(100,200);
+ctx.stroke();
+ctx.fillText("X",105,205);
+
+/* Y xanh lá */
+ctx.strokeStyle="green";
+ctx.beginPath();
+ctx.moveTo(40,200);
+ctx.lineTo(40,140);
+ctx.stroke();
+ctx.fillText("Y",30,135);
+
+/* Z xanh dương */
+ctx.strokeStyle="blue";
+ctx.beginPath();
+ctx.moveTo(40,200);
+ctx.lineTo(80,160);
+ctx.stroke();
+ctx.fillText("Z",85,155);
+}
+
+/* BOX */
+function drawBox(x,y,l,w,h){
 
 ctx.strokeRect(x,y,l,h);
 
@@ -81,7 +105,7 @@ chat.innerHTML+="<div>"+t+"</div>";
 chat.scrollTop=9999;
 }
 
-/* VOICE AI */
+/* VOICE */
 function voice(){
 
 speak("Xin chào, tôi có thể giúp gì cho bạn");
@@ -102,16 +126,15 @@ text+=e.results[i][0].transcript;
 }
 };
 
-r.onend=()=>{
+setTimeout(()=>{
+r.stop();
 process(text);
-};
-
-setTimeout(()=>r.stop(),5000);
+},7000);
 
 r.start();
 }
 
-/* NLP SIMPLE */
+/* NLP */
 function process(t){
 
 log("👤 "+t);
@@ -126,9 +149,7 @@ dz.value=nums[2]||0;
 
 draw();
 
-speak("File của bạn đã được tạo xong");
-
-saveFile();
+speak("Đã cập nhật dữ liệu");
 }
 
 /* SPEAK */
@@ -142,49 +163,18 @@ speechSynthesis.speak(u);
 function saveFile(){
 
 let data=`NEW EQUIPMENT
-USRCOG ( X ( 0 ) Y ( 0 ) Z ( 0 ) )
-USRWCO ( X ( 0 ) Y ( 0 ) Z ( 0 ) )
 POS X ${px.value}mm Y ${py.value}mm Z ${pz.value}mm
-ORI Y is -X and Z is Y
-BUIL false
-DSCO unset
-PTSP unset
-INSC unset
 
 NEW EXTRUSION
-ORI Y is -Y and Z is Z
-LEVE 0 2
 HEIG ${dz.value}mm
 
 NEW LOOP
 
-NEW VERTEX
-FRAD ${r1.value}mm
-END
-
-NEW VERTEX
-POS X 0mm Y ${dy.value}mm Z 0mm
-FRAD ${r2.value}mm
-END
-
-NEW VERTEX
-POS X ${dx.value}mm Y ${dy.value}mm Z 0mm
-FRAD ${r3.value}mm
-END
-
-NEW VERTEX
-POS X ${dx.value}mm Y 0mm Z 0mm
-FRAD ${r4.value}mm
-END
-
-END
-END
-END
-END`;
+VERTEX ${dx.value} ${dy.value}
+`;
 
 let blob=new Blob([data],{type:"text/plain"});
 let a=document.createElement("a");
-
 a.href=URL.createObjectURL(blob);
 a.download="opening.mac";
 a.click();
@@ -203,7 +193,6 @@ function help(){
 window.open("https://drive.google.com/file/d/14NNDzXSCG63m1yQZb51tZhrZfd5k8KPf/view?usp=sharing");
 }
 
-/* AUTO DRAW */
 document.querySelectorAll("input").forEach(i=>{
 i.addEventListener("input",draw);
 });
