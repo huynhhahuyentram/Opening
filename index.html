@@ -16,10 +16,13 @@
              onerror="this.onerror=null;this.src='https://via.placeholder.com/800x200?text=IMAGE+NOT+AVAILABLE';">
     </div>
 
-    <!-- POSITION -->
+    <!-- POSITION + DIMENSION -->
     <div class="row">
+
+        <!-- POSITION -->
         <div class="group">
             <h3>Position</h3>
+
             <label>X [mm]</label>
             <input id="x" value="0">
 
@@ -33,6 +36,7 @@
         <!-- DIMENSION -->
         <div class="group">
             <h3>Dimension</h3>
+
             <label>Length</label>
             <input id="dx">
 
@@ -42,24 +46,29 @@
             <label>Height</label>
             <input id="dz">
         </div>
+
     </div>
 
-    <!-- CORNER -->
+    <!-- CORNER RADIUS -->
     <div class="group">
         <h3>Corner Radius</h3>
+
         <div class="frad">
             <div>
                 <label>R1</label>
                 <input id="f1" value="150">
             </div>
+
             <div>
                 <label>R2</label>
                 <input id="f2" value="150">
             </div>
+
             <div>
                 <label>R3</label>
                 <input id="f3" value="150">
             </div>
+
             <div>
                 <label>R4</label>
                 <input id="f4" value="150">
@@ -67,9 +76,10 @@
         </div>
     </div>
 
-    <!-- AXIS -->
+    <!-- ORIENTATION -->
     <div class="group">
         <h3>Orientation</h3>
+
         <label><input type="radio" name="axis" value="X"> X</label>
         <label><input type="radio" name="axis" value="Y"> Y</label>
         <label><input type="radio" name="axis" value="Z" checked> Z</label>
@@ -83,7 +93,7 @@
         <button class="btn danger" onclick="resetForm()">Reset</button>
     </div>
 
-    <!-- CHAT -->
+    <!-- CHATBOX -->
     <div class="chatbox">
         <div id="chatLog"></div>
     </div>
