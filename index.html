@@ -171,10 +171,11 @@
             </div>
 
             <!-- Search Bar Section -->
-            <<div class="search-actions">
+<div class="search-actions" style="display: flex; gap: 8px; align-items: center;">
+    <input type="text" id="searchInput" placeholder="Search by name or tags..." oninput="filterDocs()" style="flex: 1;">
+    <button class="btn btn-amber" onclick="resetSearch()" title="Thoát tìm kiếm" style="padding: 0 12px; min-width: 40px;">🔄</button>
     <button class="btn btn-cyan" onclick="startVoiceSearch()">🎤 Voice</button>
     <button class="btn btn-purple" onclick="filterDocs()">🔍 Search</button>
-    <button class="btn btn-amber" onclick="resetSearch()" title="Thoát tìm kiếm">🔄 Refresh</button>
 </div>
 
             <!-- Add / Edit Document Form -->
