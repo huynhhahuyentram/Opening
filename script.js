@@ -598,195 +598,154 @@ function help() {
 
 
 
-// 1. Khai báo mảng chứa tài liệu
-let documents = [];
+// ==========================================
+// 📚 ADVANCED LIBRARY MODULE WITH PASSWORD & CATEGORIES
+// ==========================================
 
-// Hàm lắng nghe dữ liệu thời gian thực (Realtime) từ Firebase
-function initFirebaseListener() {
-    if (!window.db) {
-        setTimeout(initFirebaseListener, 200); // Chờ Firebase khởi tạo xong
-        return;
-    }
-    const docsRef = window.fs.collection(window.db, "documents");
-    
-    // Khi dữ liệu trên Firebase thay đổi, giao diện tự động cập nhật
-    window.fs.onSnapshot(docsRef, (snapshot) => {
-        documents = [];
-        snapshot.forEach((doc) => {
-            documents.push({ id: doc.id, ...doc.data() });
-        });
-        renderDocuments(documents);
+let activeCategoryFilter = 'all';
+let activeDepartmentFilter = null;
+const PASSWORD_PROTECTION = "kttt1234";
+
+// 1. Phân loại & Đếm số lượng
+function updateCategoryBadges() {
+    const counts = {
+        'all': documents.length,
+        'Cat-Others': 0, 'Rules & Standards': 0, 'Methods': 0, 'Experience': 0,
+        'Dept-Others': 0, 'Hull': 0, 'Piping': 0, 'Electrical': 0, 'Outfitting': 0
+    };
+
+    documents.forEach(doc => {
+        const cat = doc.category || 'Cat-Others';
+        const dept = doc.department || 'Dept-Others';
+        
+        if (counts[cat] !== undefined) counts[cat]++;
+        if (counts[dept] !== undefined) counts[dept]++;
     });
+
+    // Render Badge Counts
+    document.getElementById('count-all').innerText = counts['all'];
+    document.getElementById('count-cat-rules').innerText = counts['Rules & Standards'];
+    document.getElementById('count-cat-methods').innerText = counts['Methods'];
+    document.getElementById('count-cat-experience').innerText = counts['Experience'];
+    document.getElementById('count-cat-others').innerText = counts['Cat-Others'];
+
+    document.getElementById('count-dept-hull').innerText = counts['Hull'];
+    document.getElementById('count-dept-piping').innerText = counts['Piping'];
+    document.getElementById('count-dept-electrical').innerText = counts['Electrical'];
+    document.getElementById('count-dept-outfitting').innerText = counts['Outfitting'];
+    document.getElementById('count-dept-others').innerText = counts['Dept-Others'];
 }
 
-// Gọi lắng nghe dữ liệu ngay khi tải trang
-initFirebaseListener();
-
-// 2. Điều khiển Modal Library & Nút bấm
-function openLibraryModal() {
-    const modal = document.getElementById('libraryModal');
-    if (modal) modal.classList.add('active');
-    renderDocuments(documents);
+// 2. Chuyển Bộ Lọc Category / Department
+function selectCategory(category, element) {
+    activeCategoryFilter = category;
+    activeDepartmentFilter = null;
+    highlightActiveMenu(element);
+    filterDocs();
 }
 
-function closeLibraryModal() {
-    const modal = document.getElementById('libraryModal');
-    if (modal) modal.classList.remove('active');
-    cancelEdit();
+function selectDepartment(department, element) {
+    activeDepartmentFilter = department;
+    activeCategoryFilter = null;
+    highlightActiveMenu(element);
+    filterDocs();
 }
 
-// Hàm gán cho nút Library trên toolbar
-function library() {
-    openLibraryModal();
+function highlightActiveMenu(element) {
+    document.querySelectorAll('.menu-item').forEach(btn => btn.classList.remove('active'));
+    if (element) element.classList.add('active');
 }
 
-// 3. Render danh sách tài liệu ra HTML
-function renderDocuments(list) {
-    const docListContainer = document.getElementById('docList');
-    const docCountEl = document.getElementById('docCount');
-    
-    if (docCountEl) docCountEl.innerText = list ? list.length : 0;
-    if (!docListContainer) return;
+// 3. Render Danh Sách đã Lọc
+function filterDocs() {
+    updateCategoryBadges();
+    const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
 
-    docListContainer.innerHTML = '';
-    
-    if (!list || list.length === 0) {
-        docListContainer.innerHTML = '<div class="doc-empty">Chưa có tài liệu nào trong thư viện.</div>';
-        return;
-    }
+    const filtered = documents.filter(docItem => {
+        const matchesCategory = !activeCategoryFilter || activeCategoryFilter === 'all' || 
+                                (docItem.category || 'Cat-Others') === activeCategoryFilter;
+        
+        const matchesDepartment = !activeDepartmentFilter || 
+                                  (docItem.department || 'Dept-Others') === activeDepartmentFilter;
 
-    list.forEach(docItem => {
-        const item = document.createElement('div');
-        item.className = 'doc-item';
-        item.innerHTML = `
-            <div class="doc-info" title="${docItem.name}">
-                <span>📄</span>
-                <span><strong>${docItem.name}</strong></span>
-            </div>
-            <div class="doc-actions">
-                <button class="btn btn-purple" onclick="openDocLink('${docItem.link}')">📁 Open</button>
-                <button class="btn btn-amber" onclick="editDoc('${docItem.id}')">✏️ Edit</button>
-                <button class="btn btn-delete" onclick="deleteDoc('${docItem.id}')">✕</button>
-            </div>
-        `;
-        docListContainer.appendChild(item);
+        const matchesSearch = !searchVal || 
+                              (docItem.name && docItem.name.toLowerCase().includes(searchVal)) ||
+                              (docItem.tags && docItem.tags.some(t => t.toLowerCase().includes(searchVal)));
+
+        return matchesCategory && matchesDepartment && matchesSearch;
     });
+
+    renderDocuments(filtered);
 }
 
-function openDocLink(url) {
-    if (!url || url === '#') {
-        alert('Đường dẫn không hợp lệ!');
-        return;
-    }
-    window.open(url, '_blank');
-}
-
-// 4. Thêm mới hoặc Cập nhật tài liệu lên Firebase
+// 4. Thêm / Cập nhật tài liệu
 async function addDocument() {
     const editingId = document.getElementById('editingDocId').value;
-    const nameInput = document.getElementById('docNameInput');
-    const linkInput = document.getElementById('docLinkInput');
-    const tagsInput = document.getElementById('docTagsInput');
+    const name = document.getElementById('docNameInput').value.trim();
+    const link = document.getElementById('docLinkInput').value.trim();
+    const tagsInput = document.getElementById('docTagsInput').value;
+    const category = document.getElementById('docCategorySelect').value;
+    const department = document.getElementById('docDepartmentSelect').value;
 
-    const name = nameInput.value.trim();
-    const link = linkInput.value.trim();
-    const tags = tagsInput.value ? tagsInput.value.split(',').map(t => t.trim()) : [];
+    const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(Boolean) : [];
 
     if (!name || !link) {
-        alert('Vui lòng nhập tên tài liệu và link!');
+        alert('Vui lòng nhập đầy đủ tên tài liệu và link!');
         return;
     }
 
     try {
         if (editingId) {
-            // Cập nhật tài liệu cũ trên Firebase
             const docRef = window.fs.doc(window.db, "documents", editingId);
-            await window.fs.updateDoc(docRef, { name, link, tags });
+            await window.fs.updateDoc(docRef, { name, link, tags, category, department });
         } else {
-            // Thêm tài liệu mới lên Firebase
             const docsRef = window.fs.collection(window.db, "documents");
-            await window.fs.addDoc(docsRef, { name, link, tags });
+            await window.fs.addDoc(docsRef, { name, link, tags, category, department });
         }
         cancelEdit();
     } catch (error) {
-        console.error("Lỗi khi lưu Firebase:", error);
-        alert("Lỗi khi lưu dữ liệu!");
+        console.error("Lỗi khi lưu dữ liệu:", error);
     }
 }
 
-// 5. Chỉnh sửa (Edit) tài liệu
+// 5. Xác thực Mật khẩu khi Chỉnh sửa & Xóa
+function verifyPassword() {
+    const inputPass = prompt("🔒 Vui lòng nhập mật khẩu xác nhận:");
+    if (inputPass === PASSWORD_PROTECTION) {
+        return true;
+    } else {
+        alert("❌ Mật khẩu không chính xác!");
+        return false;
+    }
+}
+
 function editDoc(id) {
+    if (!verifyPassword()) return;
+
     const docItem = documents.find(d => d.id === id);
     if (!docItem) return;
 
     document.getElementById('editingDocId').value = docItem.id;
-    document.getElementById('docNameInput').value = docItem.name;
-    document.getElementById('docLinkInput').value = docItem.link;
+    document.getElementById('docNameInput').value = docItem.name || '';
+    document.getElementById('docLinkInput').value = docItem.link || '';
     document.getElementById('docTagsInput').value = docItem.tags ? docItem.tags.join(', ') : '';
+    document.getElementById('docCategorySelect').value = docItem.category || 'Cat-Others';
+    document.getElementById('docDepartmentSelect').value = docItem.department || 'Dept-Others';
 
     const saveBtn = document.getElementById('saveDocBtn');
     saveBtn.innerText = '💾 Save';
     saveBtn.className = 'btn btn-amber';
-    
     document.getElementById('cancelEditBtn').style.display = 'inline-flex';
 }
 
-// 6. Hủy chế độ Edit
-function cancelEdit() {
-    document.getElementById('editingDocId').value = '';
-    document.getElementById('docNameInput').value = '';
-    document.getElementById('docLinkInput').value = '';
-    document.getElementById('docTagsInput').value = '';
-
-    const saveBtn = document.getElementById('saveDocBtn');
-    saveBtn.innerText = '➕ Add';
-    saveBtn.className = 'btn btn-purple';
-
-    document.getElementById('cancelEditBtn').style.display = 'none';
-}
-
-// 7. Xóa 1 tài liệu trên Firebase
 async function deleteDoc(id) {
-    if (confirm('Bạn có chắc muốn xóa tài liệu này?')) {
+    if (!verifyPassword()) return;
+
+    if (confirm('Bạn có chắc chắn muốn xóa tài liệu này?')) {
         try {
             await window.fs.deleteDoc(window.fs.doc(window.db, "documents", id));
         } catch (error) {
-            console.error("Lỗi xóa:", error);
+            console.error("Lỗi xóa tài liệu:", error);
         }
     }
-}
-
-// 8. Xóa tất cả tài liệu
-async function clearAllDocs() {
-    if (documents.length === 0) {
-        alert('Thư viện đang trống!');
-        return;
-    }
-    
-    if (confirm('Bạn có chắc chắn muốn xóa tất cả tài liệu không?')) {
-        for (let item of documents) {
-            await window.fs.deleteDoc(window.fs.doc(window.db, "documents", item.id));
-        }
-        cancelEdit();
-    }
-}
-
-// 9. Lọc/Tìm kiếm tài liệu
-function filterDocs() {
-    const query = document.getElementById('searchInput').value.toLowerCase();
-    const filtered = documents.filter(docItem => 
-        (docItem.name && docItem.name.toLowerCase().includes(query)) || 
-        (docItem.tags && docItem.tags.some(tag => tag.toLowerCase().includes(query)))
-    );
-    renderDocuments(filtered);
-}
-
-// 10. Tìm kiếm bằng giọng nói (Giả lập)
-function startVoiceSearch() {
-    alert("Đang lắng nghe... Hãy nói tên tài liệu!");
-}
-
-// Tìm kiếm bằng giọng nói (Giả lập)
-function startVoiceSearch() {
-    alert("Đang lắng nghe... Hãy nói tên tài liệu!");
 }
