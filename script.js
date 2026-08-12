@@ -602,9 +602,50 @@ function help() {
 // 📚 ADVANCED LIBRARY MODULE WITH PASSWORD & CATEGORIES
 // ==========================================
 
+// 0. Khai báo biến toàn cục & Mật khẩu
+let documents = [];
 let activeCategoryFilter = 'all';
 let activeDepartmentFilter = null;
 const PASSWORD_PROTECTION = "kttt1234";
+
+// Lắng nghe dữ liệu thời gian thực (Realtime) từ Firebase
+function initFirebaseListener() {
+    if (!window.db || !window.fs) {
+        setTimeout(initFirebaseListener, 200);
+        return;
+    }
+    const docsRef = window.fs.collection(window.db, "documents");
+    
+    window.fs.onSnapshot(docsRef, (snapshot) => {
+        documents = [];
+        snapshot.forEach((doc) => {
+            documents.push({ id: doc.id, ...doc.data() });
+        });
+        filterDocs(); // Cập nhật lại giao diện & badge số lượng khi dữ liệu thay đổi
+    }, (error) => {
+        console.error("Lỗi Realtime Firebase:", error);
+    });
+}
+
+// Khởi chạy lắng nghe Firebase
+initFirebaseListener();
+
+// Điều khiển Modal Library
+function openLibraryModal() {
+    const modal = document.getElementById('libraryModal');
+    if (modal) modal.classList.add('active');
+    filterDocs();
+}
+
+function closeLibraryModal() {
+    const modal = document.getElementById('libraryModal');
+    if (modal) modal.classList.remove('active');
+    cancelEdit();
+}
+
+function library() {
+    openLibraryModal();
+}
 
 // 1. Phân loại & Đếm số lượng
 function updateCategoryBadges() {
@@ -622,18 +663,18 @@ function updateCategoryBadges() {
         if (counts[dept] !== undefined) counts[dept]++;
     });
 
-    // Render Badge Counts
-    document.getElementById('count-all').innerText = counts['all'];
-    document.getElementById('count-cat-rules').innerText = counts['Rules & Standards'];
-    document.getElementById('count-cat-methods').innerText = counts['Methods'];
-    document.getElementById('count-cat-experience').innerText = counts['Experience'];
-    document.getElementById('count-cat-others').innerText = counts['Cat-Others'];
+    // Render Badge Counts (Thêm kiểm tra phần tử trước khi gán để tránh lỗi)
+    if (document.getElementById('count-all')) document.getElementById('count-all').innerText = counts['all'];
+    if (document.getElementById('count-cat-rules')) document.getElementById('count-cat-rules').innerText = counts['Rules & Standards'];
+    if (document.getElementById('count-cat-methods')) document.getElementById('count-cat-methods').innerText = counts['Methods'];
+    if (document.getElementById('count-cat-experience')) document.getElementById('count-cat-experience').innerText = counts['Experience'];
+    if (document.getElementById('count-cat-others')) document.getElementById('count-cat-others').innerText = counts['Cat-Others'];
 
-    document.getElementById('count-dept-hull').innerText = counts['Hull'];
-    document.getElementById('count-dept-piping').innerText = counts['Piping'];
-    document.getElementById('count-dept-electrical').innerText = counts['Electrical'];
-    document.getElementById('count-dept-outfitting').innerText = counts['Outfitting'];
-    document.getElementById('count-dept-others').innerText = counts['Dept-Others'];
+    if (document.getElementById('count-dept-hull')) document.getElementById('count-dept-hull').innerText = counts['Hull'];
+    if (document.getElementById('count-dept-piping')) document.getElementById('count-dept-piping').innerText = counts['Piping'];
+    if (document.getElementById('count-dept-electrical')) document.getElementById('count-dept-electrical').innerText = counts['Electrical'];
+    if (document.getElementById('count-dept-outfitting')) document.getElementById('count-dept-outfitting').innerText = counts['Outfitting'];
+    if (document.getElementById('count-dept-others')) document.getElementById('count-dept-others').innerText = counts['Dept-Others'];
 }
 
 // 2. Chuyển Bộ Lọc Category / Department
@@ -659,7 +700,8 @@ function highlightActiveMenu(element) {
 // 3. Render Danh Sách đã Lọc
 function filterDocs() {
     updateCategoryBadges();
-    const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
+    const searchInput = document.getElementById('searchInput');
+    const searchVal = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
     const filtered = documents.filter(docItem => {
         const matchesCategory = !activeCategoryFilter || activeCategoryFilter === 'all' || 
@@ -676,6 +718,52 @@ function filterDocs() {
     });
 
     renderDocuments(filtered);
+}
+
+function renderDocuments(list) {
+    const docListContainer = document.getElementById('docList');
+    const docCountEl = document.getElementById('docCount');
+    
+    if (docCountEl) docCountEl.innerText = list ? list.length : 0;
+    if (!docListContainer) return;
+
+    docListContainer.innerHTML = '';
+    
+    if (!list || list.length === 0) {
+        docListContainer.innerHTML = '<div class="doc-empty">Chưa có tài liệu nào trong mục này.</div>';
+        return;
+    }
+
+    list.forEach(docItem => {
+        const item = document.createElement('div');
+        item.className = 'doc-item';
+        
+        let linkUrl = docItem.link || '#';
+        if (linkUrl !== '#' && !/^https?:\/\//i.test(linkUrl)) {
+            linkUrl = 'https://' + linkUrl;
+        }
+
+        item.innerHTML = `
+            <div class="doc-info" title="${docItem.name}">
+                <span>📄</span>
+                <span><strong>${docItem.name}</strong></span>
+            </div>
+            <div class="doc-actions">
+                <button class="btn btn-purple" onclick="openDocLink('${linkUrl}')">📁 Open</button>
+                <button class="btn btn-amber" onclick="editDoc('${docItem.id}')">✏️ Edit</button>
+                <button class="btn btn-delete" onclick="deleteDoc('${docItem.id}')">✕</button>
+            </div>
+        `;
+        docListContainer.appendChild(item);
+    });
+}
+
+function openDocLink(url) {
+    if (!url || url === '#' || url === 'https://') {
+        alert('Đường dẫn tài liệu không hợp lệ!');
+        return;
+    }
+    window.open(url, '_blank');
 }
 
 // 4. Thêm / Cập nhật tài liệu
@@ -705,6 +793,7 @@ async function addDocument() {
         cancelEdit();
     } catch (error) {
         console.error("Lỗi khi lưu dữ liệu:", error);
+        alert("Có lỗi xảy ra khi lưu dữ liệu!");
     }
 }
 
@@ -733,9 +822,32 @@ function editDoc(id) {
     document.getElementById('docDepartmentSelect').value = docItem.department || 'Dept-Others';
 
     const saveBtn = document.getElementById('saveDocBtn');
-    saveBtn.innerText = '💾 Save';
-    saveBtn.className = 'btn btn-amber';
-    document.getElementById('cancelEditBtn').style.display = 'inline-flex';
+    if (saveBtn) {
+        saveBtn.innerText = '💾 Save';
+        saveBtn.className = 'btn btn-amber';
+    }
+    const cancelBtn = document.getElementById('cancelEditBtn');
+    if (cancelBtn) cancelBtn.style.display = 'inline-flex';
+}
+
+function cancelEdit() {
+    const editingIdEl = document.getElementById('editingDocId');
+    if (editingIdEl) editingIdEl.value = '';
+    
+    if (document.getElementById('docNameInput')) document.getElementById('docNameInput').value = '';
+    if (document.getElementById('docLinkInput')) document.getElementById('docLinkInput').value = '';
+    if (document.getElementById('docTagsInput')) document.getElementById('docTagsInput').value = '';
+    if (document.getElementById('docCategorySelect')) document.getElementById('docCategorySelect').value = 'Cat-Others';
+    if (document.getElementById('docDepartmentSelect')) document.getElementById('docDepartmentSelect').value = 'Dept-Others';
+
+    const saveBtn = document.getElementById('saveDocBtn');
+    if (saveBtn) {
+        saveBtn.innerText = '➕ Add';
+        saveBtn.className = 'btn btn-purple';
+    }
+
+    const cancelBtn = document.getElementById('cancelEditBtn');
+    if (cancelBtn) cancelBtn.style.display = 'none';
 }
 
 async function deleteDoc(id) {
@@ -748,4 +860,35 @@ async function deleteDoc(id) {
             console.error("Lỗi xóa tài liệu:", error);
         }
     }
+}
+
+// 6. Tìm kiếm giọng nói (Voice Search)
+function startVoiceSearch() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        alert("Trình duyệt không hỗ trợ nhận diện giọng nói!");
+        return;
+    }
+
+    const searchInput = document.getElementById('searchInput');
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'vi-VN';
+
+    recognition.onstart = () => {
+        if (searchInput) searchInput.placeholder = "🎙️ Đang lắng nghe...";
+    };
+
+    recognition.onresult = (event) => {
+        const text = event.results[0][0].transcript;
+        if (searchInput) {
+            searchInput.value = text;
+            filterDocs();
+        }
+    };
+
+    recognition.onend = () => {
+        if (searchInput) searchInput.placeholder = "Search by name or tags...";
+    };
+
+    recognition.start();
 }
